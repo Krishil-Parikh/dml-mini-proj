@@ -1,0 +1,31 @@
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-nexabank-backend:local}
+    build: ./backend
+    container_name: nexabank-backend
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-4o-mini}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-http://localhost}
+      - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-NexaBank}
+    volumes:
+      - db_data:/app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-nexabank-frontend:local}
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: nexabank-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:
