@@ -1,4 +1,13 @@
 services:
+  mongodb:
+    image: mongo:6.0
+    container_name: nexabank-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
   backend:
     image: ${BACKEND_IMAGE:-nexabank-backend:local}
     build: ./backend
@@ -9,10 +18,11 @@ services:
       - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       - OPENROUTER_SITE_URL=${OPENROUTER_SITE_URL:-http://localhost}
       - OPENROUTER_APP_NAME=${OPENROUTER_APP_NAME:-NexaBank}
-    volumes:
-      - db_data:/app
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb:27017/}
     ports:
       - "8000:8000"
+    depends_on:
+      - mongodb
     restart: unless-stopped
 
   frontend:
@@ -28,4 +38,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  db_data:
+  mongo_data:
