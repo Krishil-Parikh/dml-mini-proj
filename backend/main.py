@@ -314,3 +314,18 @@ Keep responses under 3 sentences unless detail is needed."""
 @app.get("/actuator/health")
 def health():
     return {"status": "UP", "timestamp": datetime.now().isoformat()}
+
+from fastapi.responses import FileResponse
+import os
+
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    # Try to serve as a static file if it exists, else serve index.html
+    frontend_dir = os.path.join(os.path.dirname(__file__), "../frontend")
+    file_path = os.path.join(frontend_dir, full_path)
+    
+    if full_path and os.path.isfile(file_path):
+        return FileResponse(file_path)
+    
+    # Otherwise return the SPA index.html
+    return FileResponse(os.path.join(frontend_dir, "index.html"))
